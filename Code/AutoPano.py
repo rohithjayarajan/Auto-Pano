@@ -71,36 +71,36 @@ class Stitcher:
 	Save ANMS output as anms.png
 	"""
 
-    # def DetectCornersHarris(self, InputImage, Threshold=0.005):
-    #     grayImage = np.float32(cv2.cvtColor(InputImage, cv2.COLOR_BGR2GRAY))
-    #     CornerImage = cv2.cornerHarris(grayImage, 2, 3, 0.04)
-    #     tempImage = grayImage.copy()
-    #     tempImage[CornerImage < Threshold * CornerImage.max()] = 0
-    #     return tempImage
+    def DetectCornersHarris(self, InputImage, Threshold=0.005):
+        grayImage = np.float32(cv2.cvtColor(InputImage, cv2.COLOR_BGR2GRAY))
+        CornerImage = cv2.cornerHarris(grayImage, 2, 3, 0.04)
+        tempImage = grayImage.copy()
+        tempImage[CornerImage < Threshold * CornerImage.max()] = 0
+        return tempImage
 
-    # def ANMS(self, CornerScoreImage, Nbest=100):
+    def ANMS(self, CornerScoreImage, Nbest=100):
 
-    #     LocalMaxima = peak_local_max(CornerScoreImage, min_distance=15)
-    #     r = np.zeros((LocalMaxima.shape[0], 3), dtype=np.float32)
-    #     r[:, 2] = float("inf")
-    #     IdX = 0
+        LocalMaxima = peak_local_max(CornerScoreImage, min_distance=15)
+        r = np.zeros((LocalMaxima.shape[0], 3), dtype=np.float32)
+        r[:, 2] = float("inf")
+        IdX = 0
 
-    #     for i in LocalMaxima:
-    #         r[IdX][0] = i[1]
-    #         r[IdX][1] = i[0]
-    #         ED = float("inf")
-    #         for j in LocalMaxima:
-    #             if (CornerScoreImage[j[0], j[1]] > CornerScoreImage[i[0], i[1]]):
-    #                 ED = (j[1] - i[1])**2 + (j[0] - i[0])**2
-    #             if (ED < r[IdX][2]):
-    #                 r[IdX][2] = ED
-    #         IdX += 1
-    #     ind = np.argsort(r[:, 2])
-    #     r = r[ind]
+        for i in LocalMaxima:
+            r[IdX][0] = i[1]
+            r[IdX][1] = i[0]
+            ED = float("inf")
+            for j in LocalMaxima:
+                if (CornerScoreImage[j[0], j[1]] > CornerScoreImage[i[0], i[1]]):
+                    ED = (j[1] - i[1])**2 + (j[0] - i[0])**2
+                if (ED < r[IdX][2]):
+                    r[IdX][2] = ED
+            IdX += 1
+        ind = np.argsort(r[:, 2])
+        r = r[ind]
 
-    #     if debug:
-    #         print("Features after ANMS: " + str(len(r[0:Nbest, 0:2])))
-    #     return r[0:Nbest, 0:2]
+        if debug:
+            print("Features after ANMS: " + str(len(r[0:Nbest, 0:2])))
+        return r[0:Nbest, 0:2]
 
     """
 	Feature Descriptors
@@ -317,7 +317,8 @@ class Stitcher:
                     y = IdY - oY
                     x = IdX - oX
                     PanoHolder[IdY, IdX, :] = NextImage[y, x, :]
-            Pano = self.RemoveBlackBoundary(PanoHolder)
+            # Pano = self.RemoveBlackBoundary(PanoHolder)
+            Pano = PanoHolder
         PanoResize = cv2.resize(Pano, (1280, 1024))
         self.HelperFunctions.ShowImage(PanoResize, 'PanoResize')
         PanoResize = cv2.GaussianBlur(PanoResize, (5, 5), 1.2)
@@ -327,7 +328,7 @@ class Stitcher:
 def main():
 
     Parser = argparse.ArgumentParser()
-    Parser.add_argument('--BasePath', default='/home/rohith/CMSC733/git/Auto-Pano/Data/Train/Set1',
+    Parser.add_argument('--BasePath', default='/home/rohith/CMSC733/git/Auto-Pano/Data/Test/TestSet22',
                         help='Base path of images, Default:/home/rohith/CMSC733/git/Auto-Pano/Data/Train/Set1')
     Parser.add_argument('--NumFeatures', default='700',
                         help='Number of best features to extract from each image, Default:100')
